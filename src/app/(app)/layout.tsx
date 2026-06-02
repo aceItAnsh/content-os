@@ -5,15 +5,16 @@ import { TopBar } from '@/components/layout/TopBar';
 import { PlatformFilterProvider, usePlatformFilter } from '@/lib/platform-filter-context';
 
 function AppLayoutInner({ children }: { children: React.ReactNode }) {
-  const { platformFilter, setPlatformFilter } = usePlatformFilter();
+  const { platformFilter, setPlatformFilter, showFilter } = usePlatformFilter();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#0a0a0a] overflow-x-hidden">
       <Sidebar />
       <div className="md:ml-[52px] lg:ml-60 pb-16 md:pb-0">
         <TopBar
           platformFilter={platformFilter}
           onPlatformFilterChange={setPlatformFilter}
+          showFilter={showFilter}
         />
         <main className="p-4 md:p-6 max-w-7xl mx-auto">{children}</main>
       </div>

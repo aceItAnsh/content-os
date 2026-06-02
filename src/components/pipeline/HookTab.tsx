@@ -10,7 +10,7 @@ interface Hook {
   matchedReel: string;
 }
 
-export function HookTab() {
+export function HookTab({ scraperResults, scraperTimestamp }: { scraperResults?: { platform: string; title: string }[]; scraperTimestamp?: number | null }) {
   const [topic, setTopic] = useState('');
   const [scriptContext, setScriptContext] = useState('');
   const [loading, setLoading] = useState(false);
@@ -64,6 +64,13 @@ export function HookTab() {
 
   return (
     <div className="space-y-6 bg-[#111111] border border-white/5 rounded-xl p-6">
+      {scraperResults && scraperResults.length > 0 && scraperTimestamp && (Date.now() - scraperTimestamp < 3600000) && (
+        <div className="flex items-center justify-between bg-indigo-500/5 border border-indigo-500/20 rounded-lg px-4 py-2.5">
+          <span className="text-xs text-indigo-300">
+            Using results from latest scrape — <span className="font-semibold text-white">{scraperResults.length}</span> posts found
+          </span>
+        </div>
+      )}
       <div className="space-y-4">
         <div className="space-y-2">
           <label className="text-xs text-zinc-400 font-medium">Script Topic</label>

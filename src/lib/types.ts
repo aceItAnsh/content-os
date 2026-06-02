@@ -12,6 +12,8 @@ export interface Checklist {
   posted: boolean;
 }
 
+export type ContentType = 'reel' | 'youtube_shorts' | 'youtube_video';
+
 export interface ContentCard {
   id: string;
   user_id: string;
@@ -25,6 +27,7 @@ export interface ContentCard {
   priority: Priority;
   post_url: string | null;
   checklist: Checklist;
+  content_type: ContentType | null;
   created_at: string;
   updated_at: string;
 }

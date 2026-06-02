@@ -20,7 +20,12 @@ export default function ScriptsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const scriptsCards = cards.filter((c) => c.script && c.script.trim().length > 0);
+  const scriptsCards = cards.filter(
+    (c) =>
+      (c.status === 'scripted' || c.status === 'filmed' || c.status === 'edited' || c.status === 'posted') &&
+      c.script &&
+      c.script.trim().length > 0
+  );
 
   const filtered = scriptsCards.filter((c) => {
     const matchSearch =
@@ -99,7 +104,7 @@ export default function ScriptsPage() {
           </div>
           <p className="text-sm text-zinc-400">
             {scriptsCards.length === 0
-              ? 'No scripts yet. Write one in the Kanban card editor or use the AI Pipeline.'
+              ? 'No scripts yet. Write a script in a card to see it here.'
               : 'No scripts match your search.'}
           </p>
         </div>

@@ -51,18 +51,31 @@ async function runActor(actorId: string, input: Record<string, unknown>): Promis
 }
 
 export async function scrapeInstagramReels(keywords: string[], handles: string[]) {
-  return runActor('apify~instagram-scraper', {
-    directUrls: handles.map((h) => `https://www.instagram.com/${h.replace('@', '')}/`),
-    resultsType: 'posts',
+  // Primary: hashtag search
+  const result = await runActor('apify~instagram-scraper', {
+    searchType: 'hashtag',
+    searchQueries: keywords,
     resultsLimit: 20,
     addParentData: false,
+    isUserTaggedFeedURL: false,
+    loginRequired: false,
   });
+
+  // Fallback: if primary returns 0 results, try reel scraper with handles
+  if (result.items.length === 0 && handles.length > 0) {
+    return runActor('apify~instagram-reel-scraper', {
+      username: handles.map((h) => h.replace('@', '')),
+      resultsLimit: 20,
+    });
+  }
+
+  return result;
 }
 
 export async function scrapeYouTubeShorts(keywords: string[]) {
   return runActor('streamers~youtube-scraper', {
-    searchKeywords: keywords,
+    searchKeywords: keywords.join(', '),
     maxResults: 20,
-    dateFilter: 'week',
+    dateFilter: 'month',
   });
 }

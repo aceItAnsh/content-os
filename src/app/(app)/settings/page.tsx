@@ -181,23 +181,29 @@ export default function SettingsPage() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs text-zinc-400 font-medium">Title</label>
+              <label className="text-xs text-zinc-400 font-medium">Script Name (e.g. AI tools reel May 2026)</label>
               <input
                 value={newSample.title}
                 onChange={(e) => setNewSample({ ...newSample, title: e.target.value })}
-                placeholder="e.g., 'My AI Tools Reel Caption'"
+                placeholder="Give this sample a recognizable name"
                 className="w-full h-10 px-3 bg-[#0a0a0a] border border-white/5 rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500/50 transition-colors"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs text-zinc-400 font-medium">Content</label>
+              <label className="text-xs text-zinc-400 font-medium">Paste your script or caption here</label>
               <textarea
                 value={newSample.content}
                 onChange={(e) => setNewSample({ ...newSample, content: e.target.value })}
-                placeholder="Paste a past script or caption..."
+                placeholder="Paste a past script, caption, or voiceover text (min 50 characters)..."
                 rows={8}
                 className="w-full px-3 py-2 bg-[#0a0a0a] border border-white/5 rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500/50 transition-colors resize-none"
               />
+              <div className="flex items-center justify-between">
+                <span className={`text-[11px] ${newSample.content.length > 0 && newSample.content.length < 50 ? 'text-amber-400' : 'text-zinc-500'}`}>
+                  {newSample.content.length > 0 && newSample.content.length < 50 && '⚠ Min 50 characters recommended'}
+                </span>
+                <span className="text-[11px] text-zinc-500">{newSample.content.length} chars</span>
+              </div>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setAddOpen(false)} className="text-zinc-400 hover:text-zinc-200">

@@ -61,7 +61,11 @@ export function KanbanCard({ card, index, onClick }: KanbanCardProps) {
                       : 'bg-red-500/10 text-red-400'
                   }`}
                 >
-                  {card.platform === 'instagram' ? 'IG Reel' : 'YT Short'}
+                  {card.platform === 'instagram'
+                    ? 'Instagram'
+                    : card.content_type === 'youtube_video'
+                    ? 'YT Video'
+                    : 'YT Shorts'}
                 </span>
                 {card.priority === 'high' && (
                   <span className="w-2 h-2 rounded-full bg-red-500" />

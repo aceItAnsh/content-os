@@ -8,6 +8,17 @@ import { ScriptTab } from '@/components/pipeline/ScriptTab';
 import { HookTab } from '@/components/pipeline/HookTab';
 import { Loader2, Sparkles, Check } from 'lucide-react';
 
+export interface ScrapedPost {
+  platform: string;
+  title: string;
+  views: number;
+  likes: number;
+  comments: number;
+  er: number;
+  date: string;
+  viral: boolean;
+}
+
 export default function AiPipelinePage() {
   const [fullPipelineTopic, setFullPipelineTopic] = useState('');
   const [fullPipelineRunning, setFullPipelineRunning] = useState(false);
@@ -20,6 +31,10 @@ export default function AiPipelinePage() {
     recommendedHook: string;
   } | null>(null);
   const [creatingCard, setCreatingCard] = useState(false);
+
+  // Lifted scraper results state
+  const [scraperResults, setScraperResults] = useState<ScrapedPost[]>([]);
+  const [scraperTimestamp, setScraperTimestamp] = useState<number | null>(null);
 
   const handleFullPipeline = async () => {
     if (!fullPipelineTopic.trim()) return;
@@ -108,7 +123,7 @@ export default function AiPipelinePage() {
 
       {/* Full Pipeline */}
       <div className="bg-[#111111] border border-indigo-500/20 rounded-xl p-6">
-        <div className="flex items-end gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
           <div className="flex-1 space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-zinc-300">
               <Sparkles className="w-4 h-4 text-indigo-400" />
@@ -124,7 +139,7 @@ export default function AiPipelinePage() {
           <button
             onClick={handleFullPipeline}
             disabled={fullPipelineRunning || !fullPipelineTopic.trim()}
-            className="shrink-0 h-11 px-6 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 shadow-lg shadow-indigo-500/20"
+            className="shrink-0 h-11 w-full sm:w-auto px-6 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
           >
             {fullPipelineRunning && (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -215,33 +230,37 @@ export default function AiPipelinePage() {
       <Tabs defaultValue="scraper">
         <TabsList className="bg-transparent border-b border-white/5 rounded-none w-full justify-start gap-0 p-0 h-auto">
           <TabsTrigger value="scraper" className="rounded-none border-b-2 border-transparent data-[state=active]:border-indigo-500 data-[state=active]:bg-transparent data-[state=active]:text-white text-zinc-400 pb-3 px-4">
-            Scraper
+            <span className="hidden sm:inline">Scraper</span>
+            <span className="sm:hidden">Scrape</span>
           </TabsTrigger>
           <TabsTrigger value="validator" className="rounded-none border-b-2 border-transparent data-[state=active]:border-indigo-500 data-[state=active]:bg-transparent data-[state=active]:text-white text-zinc-400 pb-3 px-4">
-            Validator
+            <span className="hidden sm:inline">Validator</span>
+            <span className="sm:hidden">Validate</span>
           </TabsTrigger>
           <TabsTrigger value="script" className="rounded-none border-b-2 border-transparent data-[state=active]:border-indigo-500 data-[state=active]:bg-transparent data-[state=active]:text-white text-zinc-400 pb-3 px-4">
-            Script Writer
+            <span className="hidden sm:inline">Script Writer</span>
+            <span className="sm:hidden">Write</span>
           </TabsTrigger>
           <TabsTrigger value="hooks" className="rounded-none border-b-2 border-transparent data-[state=active]:border-indigo-500 data-[state=active]:bg-transparent data-[state=active]:text-white text-zinc-400 pb-3 px-4">
-            Hook Generator
+            <span className="hidden sm:inline">Hook Generator</span>
+            <span className="sm:hidden">Hooks</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="scraper" className="mt-6">
-          <ScraperTab />
+          <ScraperTab onResults={(results) => { setScraperResults(results); setScraperTimestamp(Date.now()); }} />
         </TabsContent>
 
         <TabsContent value="validator" className="mt-6">
-          <ValidatorTab />
+          <ValidatorTab scraperResults={scraperResults} scraperTimestamp={scraperTimestamp} />
         </TabsContent>
 
         <TabsContent value="script" className="mt-6">
-          <ScriptTab />
+          <ScriptTab scraperResults={scraperResults} scraperTimestamp={scraperTimestamp} />
         </TabsContent>
 
         <TabsContent value="hooks" className="mt-6">
-          <HookTab />
+          <HookTab scraperResults={scraperResults} scraperTimestamp={scraperTimestamp} />
         </TabsContent>
       </Tabs>
     </div>

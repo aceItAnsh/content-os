@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { KanbanColumn } from './KanbanColumn';
 import { CardModal } from './CardModal';
-import { ContentCard, Status, STATUS_COLUMNS, Platform, Priority } from '@/lib/types';
+import { ContentCard, Status, STATUS_COLUMNS, Platform, Priority, Checklist, DEFAULT_CHECKLIST, ContentType } from '@/lib/types';
 import { getCards, createCard, updateCard } from '@/lib/supabase/api';
 import { createClient } from '@/lib/supabase/client';
+import { usePlatformFilter } from '@/lib/platform-filter-context';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ import {
 
 export function KanbanBoard() {
   const [supabase] = useState(() => createClient());
+  const { platformFilter } = usePlatformFilter();
   const [cards, setCards] = useState<ContentCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,8 +37,9 @@ export function KanbanBoard() {
   const [newCard, setNewCard] = useState({
     title: '',
     platform: 'instagram' as Platform,
-    scheduled_date: '',
+    scheduled_date: new Date().toISOString().split('T')[0],
     priority: 'normal' as Priority,
+    content_type: '' as string,
   });
 
   const loadCards = useCallback(async () => {
@@ -103,7 +106,11 @@ export function KanbanBoard() {
   }, [supabase]);
 
   const getColumnCards = (status: Status) =>
-    cards.filter((c) => c.status === status);
+    cards.filter((c) => {
+      if (c.status !== status) return false;
+      if (platformFilter !== 'all' && c.platform !== platformFilter) return false;
+      return true;
+    });
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
@@ -113,13 +120,34 @@ export function KanbanBoard() {
     const card = cards.find((c) => c.id === cardId);
     if (!card || card.status === newStatus) return;
 
+    // Auto-fill checklist based on target status
+    const newChecklist: Checklist = { ...DEFAULT_CHECKLIST };
+    if (newStatus === 'scripted') {
+      newChecklist.script_written = true;
+    } else if (newStatus === 'filmed') {
+      newChecklist.script_written = true;
+      newChecklist.filmed = true;
+    } else if (newStatus === 'edited') {
+      newChecklist.script_written = true;
+      newChecklist.filmed = true;
+      newChecklist.edited = true;
+    } else if (newStatus === 'posted') {
+      newChecklist.script_written = true;
+      newChecklist.hook_chosen = true;
+      newChecklist.filmed = true;
+      newChecklist.edited = true;
+      newChecklist.caption_ready = true;
+      newChecklist.posted = true;
+    }
+    // 'idea' → all false (DEFAULT_CHECKLIST)
+
     // Optimistic update
     setCards((prev) =>
-      prev.map((c) => (c.id === cardId ? { ...c, status: newStatus } : c))
+      prev.map((c) => (c.id === cardId ? { ...c, status: newStatus, checklist: newChecklist } : c))
     );
 
     try {
-      await updateCard(cardId, { status: newStatus });
+      await updateCard(cardId, { status: newStatus, checklist: newChecklist });
     } catch (err) {
       console.error(err);
       loadCards(); // Revert on error
@@ -129,16 +157,29 @@ export function KanbanBoard() {
   const handleAddCard = async () => {
     if (!newCard.title.trim()) return;
     try {
+      const contentType: ContentType | null =
+        newCard.platform === 'instagram'
+          ? 'reel'
+          : newCard.content_type
+            ? (newCard.content_type as ContentType)
+            : 'youtube_shorts';
       const created = await createCard({
         title: newCard.title,
         platform: newCard.platform,
         status: addStatus,
         scheduled_date: newCard.scheduled_date || null,
         priority: newCard.priority,
+        content_type: contentType,
       });
       setCards((prev) => [created, ...prev]);
       setAddDialogOpen(false);
-      setNewCard({ title: '', platform: 'instagram', scheduled_date: '', priority: 'normal' });
+      setNewCard({
+        title: '',
+        platform: 'instagram',
+        scheduled_date: new Date().toISOString().split('T')[0],
+        priority: 'normal',
+        content_type: '',
+      });
     } catch (err) {
       console.error(err);
     }
@@ -240,15 +281,15 @@ export function KanbanBoard() {
                 <Select
                   value={newCard.platform}
                   onValueChange={(v) =>
-                    setNewCard({ ...newCard, platform: v as Platform })
+                    setNewCard({ ...newCard, platform: v as Platform, content_type: v === 'instagram' ? '' : newCard.content_type })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="instagram">Instagram Reels</SelectItem>
-                    <SelectItem value="youtube">YouTube Shorts</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="youtube">YouTube</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -271,6 +312,24 @@ export function KanbanBoard() {
                 </Select>
               </div>
             </div>
+
+            {newCard.platform === 'youtube' && (
+              <div className="space-y-2">
+                <Label>Content Type</Label>
+                <Select
+                  value={newCard.content_type || 'youtube_shorts'}
+                  onValueChange={(v) => setNewCard({ ...newCard, content_type: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="youtube_shorts">YouTube Shorts</SelectItem>
+                    <SelectItem value="youtube_video">YouTube Video</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Scheduled Date</Label>

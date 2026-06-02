@@ -172,8 +172,8 @@ export function CardModal({ card, open, onClose, onUpdate, onDelete }: CardModal
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="instagram">Instagram Reels</SelectItem>
-                  <SelectItem value="youtube">YouTube Shorts</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="youtube">YouTube</SelectItem>
                 </SelectContent>
               </Select>
             </div>

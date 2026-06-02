@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/select';
 import { createCard } from '@/lib/supabase/api';
 import { Platform } from '@/lib/types';
+import { usePlatformFilter } from '@/lib/platform-filter-context';
 
 export function CalendarGrid() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -47,6 +48,7 @@ export function CalendarGrid() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addDate, setAddDate] = useState('');
   const [newCard, setNewCard] = useState({ title: '', platform: 'instagram' as Platform });
+  const { platformFilter } = usePlatformFilter();
 
   const loadCards = useCallback(async () => {
     try {
@@ -65,7 +67,12 @@ export function CalendarGrid() {
 
   const getCardsForDate = (date: Date) =>
     cards.filter(
-      (c) => c.scheduled_date && isSameDay(new Date(c.scheduled_date + 'T12:00:00'), date)
+      (c) => {
+        if (!c.scheduled_date) return false;
+        if (!isSameDay(new Date(c.scheduled_date + 'T12:00:00'), date)) return false;
+        if (platformFilter !== 'all' && c.platform !== platformFilter) return false;
+        return true;
+      }
     );
 
   const handlePrev = () => {
@@ -132,7 +139,7 @@ export function CalendarGrid() {
       days.push(
         <div
           key={dateStr}
-          className={`group bg-[#111111] border border-white/5 rounded-lg p-2 min-h-[120px] ${
+          className={`group bg-[#111111] border border-white/5 rounded-lg p-1 sm:p-2 min-h-[100px] sm:min-h-[120px] ${
             viewMode === 'week' ? 'min-h-[200px]' : ''
           } ${!isCurrentMonth && viewMode === 'month' ? 'opacity-40' : ''} ${
             isToday ? 'border-indigo-500/50 bg-indigo-500/5' : ''
@@ -211,7 +218,7 @@ export function CalendarGrid() {
             <ChevronRight className="h-4 w-4 text-zinc-400" />
           </button>
         </div>
-        <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
+        <div className="flex gap-1 bg-white/5 p-1 rounded-lg hidden sm:flex">
           <button
             onClick={() => setViewMode('month')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
@@ -231,13 +238,14 @@ export function CalendarGrid() {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1.5 overflow-x-hidden">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
           <div
             key={d}
             className="text-center text-xs font-medium text-zinc-500 py-2"
           >
-            {d}
+            <span className="hidden sm:inline">{d}</span>
+            <span className="sm:hidden">{d[0]}</span>
           </div>
         ))}
         {renderDays()}
@@ -279,8 +287,8 @@ export function CalendarGrid() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="instagram">Instagram Reels</SelectItem>
-                  <SelectItem value="youtube">YouTube Shorts</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="youtube">YouTube</SelectItem>
                 </SelectContent>
               </Select>
             </div>

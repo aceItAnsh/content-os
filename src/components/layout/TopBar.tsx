@@ -20,9 +20,10 @@ const platforms = ['All', 'Instagram', 'YouTube'] as const;
 interface TopBarProps {
   platformFilter: string;
   onPlatformFilterChange: (platform: string) => void;
+  showFilter: boolean;
 }
 
-export function TopBar({ platformFilter, onPlatformFilterChange }: TopBarProps) {
+export function TopBar({ platformFilter, onPlatformFilterChange, showFilter }: TopBarProps) {
   const [user, setUser] = useState<User | null>(null);
   const [supabase] = useState(() => createClient());
   const router = useRouter();
@@ -38,26 +39,30 @@ export function TopBar({ platformFilter, onPlatformFilterChange }: TopBarProps) 
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between bg-[#0a0a0a]/80 backdrop-blur-xl px-6 py-3 border-b border-white/5">
-      <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
-        {platforms.map((p) => {
-          const value = p.toLowerCase() === 'all' ? 'all' : p.toLowerCase();
-          const isActive = platformFilter === value;
-          return (
-            <button
-              key={p}
-              onClick={() => onPlatformFilterChange(value)}
-              className={cn(
-                'px-3.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
-                isActive
-                  ? 'bg-white/10 text-white shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              )}
-            >
-              {p}
-            </button>
-          );
-        })}
-      </div>
+      {showFilter ? (
+        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+          {platforms.map((p) => {
+            const value = p.toLowerCase() === 'all' ? 'all' : p.toLowerCase();
+            const isActive = platformFilter === value;
+            return (
+              <button
+                key={p}
+                onClick={() => onPlatformFilterChange(value)}
+                className={cn(
+                  'px-3.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
+                  isActive
+                    ? 'bg-white/10 text-white shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                )}
+              >
+                {p}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div />
+      )}
 
       <div className="flex items-center gap-3">
         <span className="text-[13px] text-zinc-400 hidden sm:block">

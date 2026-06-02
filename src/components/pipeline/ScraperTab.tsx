@@ -15,7 +15,11 @@ interface ScrapedPost {
   viral: boolean;
 }
 
-export function ScraperTab() {
+interface ScraperTabProps {
+  onResults?: (results: ScrapedPost[]) => void;
+}
+
+export function ScraperTab({ onResults }: ScraperTabProps) {
   const [keywords, setKeywords] = useState(
     'AI tools, Claude Code, automation, AI agents, vibe coding'
   );
@@ -50,8 +54,10 @@ export function ScraperTab() {
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      setResults(data.results || []);
+      const r = data.results || [];
+      setResults(r);
       setHasRun(true);
+      onResults?.(r);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Scraper failed');
     } finally {
@@ -78,8 +84,8 @@ export function ScraperTab() {
   };
 
   return (
-    <div className="space-y-6 bg-[#111111] border border-white/5 rounded-xl p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-6 bg-[#111111] border border-white/5 rounded-xl p-4 sm:p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-xs text-zinc-400 font-medium">Keywords (comma separated)</label>
           <input
@@ -99,7 +105,7 @@ export function ScraperTab() {
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6">
         <div className="flex items-center gap-4">
           <span className="text-xs text-zinc-400 font-medium">Platforms:</span>
           <div className="flex items-center gap-2">

@@ -1,24 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getCards } from '@/lib/supabase/api';
 import { ContentCard, STATUS_COLUMNS } from '@/lib/types';
 import { Columns3, CalendarDays, Film, FileText, Plus, AlertCircle } from 'lucide-react';
 import { usePlatformFilter } from '@/lib/platform-filter-context';
+import { CardModal } from '@/components/kanban/CardModal';
 import Link from 'next/link';
 
 export default function DashboardPage() {
   const [cards, setCards] = useState<ContentCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCard, setSelectedCard] = useState<ContentCard | null>(null);
   const { platformFilter } = usePlatformFilter();
 
-  useEffect(() => {
+  const loadCards = useCallback(() => {
     getCards()
       .then(setCards)
       .catch((err) => setError(err.message || 'Failed to load cards'))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadCards();
+  }, [loadCards]);
 
   const filtered = platformFilter === 'all'
     ? cards
@@ -36,6 +42,16 @@ export default function DashboardPage() {
     ...col,
     count: filtered.filter((c) => c.status === col.id).length,
   }));
+
+  const handleCardUpdate = (updated: ContentCard) => {
+    setCards((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+    setSelectedCard((prev) => (prev?.id === updated.id ? updated : prev));
+  };
+
+  const handleCardDelete = (id: string) => {
+    setCards((prev) => prev.filter((c) => c.id !== id));
+    setSelectedCard(null);
+  };
 
   if (loading) {
     return (
@@ -164,7 +180,8 @@ export default function DashboardPage() {
             {filtered.slice(0, 5).map((card, i) => (
               <div
                 key={card.id}
-                className={`flex items-center gap-4 px-5 py-3.5 hover:bg-white/[0.02] transition-colors ${
+                onClick={() => setSelectedCard(card)}
+                className={`flex items-center gap-4 px-5 py-3.5 cursor-pointer hover:bg-white/5 transition-colors ${
                   i !== Math.min(filtered.length - 1, 4) ? 'border-b border-white/5' : ''
                 }`}
               >
@@ -193,6 +210,16 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {selectedCard && (
+        <CardModal
+          card={selectedCard}
+          open={!!selectedCard}
+          onClose={() => setSelectedCard(null)}
+          onUpdate={handleCardUpdate}
+          onDelete={handleCardDelete}
+        />
+      )}
     </div>
   );
 }

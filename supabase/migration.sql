@@ -9,6 +9,7 @@ create table public.content_cards (
   platform text not null check (platform in ('instagram', 'youtube')),
   status text not null default 'idea' check (status in ('idea', 'scripted', 'filmed', 'edited', 'posted')),
   scheduled_date date,
+  content_type text check (content_type in ('reel', 'youtube_shorts', 'youtube_video')),
   notes text,
   script text,
   hook text,
