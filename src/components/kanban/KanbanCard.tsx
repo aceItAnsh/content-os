@@ -52,8 +52,8 @@ export function KanbanCard({ card, index, onClick }: KanbanCardProps) {
               onClick={onClick}
               className="flex-1 py-3 pr-8 space-y-3 cursor-pointer min-w-0"
             >
-              {/* Platform + priority */}
-              <div className="flex items-center gap-2">
+              {/* Platform + content type + priority */}
+              <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold ${
                     card.platform === 'instagram'
@@ -61,11 +61,22 @@ export function KanbanCard({ card, index, onClick }: KanbanCardProps) {
                       : 'bg-red-500/10 text-red-400'
                   }`}
                 >
+                  {card.platform === 'instagram' ? 'Instagram' : 'YouTube'}
+                </span>
+                <span
+                  className={`inline-flex px-1.5 py-0.5 rounded-md text-[9px] font-medium ${
+                    card.platform === 'instagram'
+                      ? 'bg-pink-500/10 text-pink-300'
+                      : card.content_type === 'youtube_video'
+                      ? 'bg-blue-500/10 text-blue-300'
+                      : 'bg-amber-500/10 text-amber-300'
+                  }`}
+                >
                   {card.platform === 'instagram'
-                    ? 'Instagram'
+                    ? 'Reel'
                     : card.content_type === 'youtube_video'
-                    ? 'YT Video'
-                    : 'YT Shorts'}
+                    ? 'Video'
+                    : 'Shorts'}
                 </span>
                 {card.priority === 'high' && (
                   <span className="w-2 h-2 rounded-full bg-red-500" />

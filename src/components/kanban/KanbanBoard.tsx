@@ -126,9 +126,11 @@ export function KanbanBoard() {
       newChecklist.script_written = true;
     } else if (newStatus === 'filmed') {
       newChecklist.script_written = true;
+      newChecklist.hook_chosen = true;
       newChecklist.filmed = true;
     } else if (newStatus === 'edited') {
       newChecklist.script_written = true;
+      newChecklist.hook_chosen = true;
       newChecklist.filmed = true;
       newChecklist.edited = true;
     } else if (newStatus === 'posted') {

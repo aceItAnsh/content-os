@@ -58,6 +58,7 @@ export async function createCard(card: Partial<ContentCard>) {
       priority: card.priority || 'normal',
       post_url: card.post_url || null,
       checklist: card.checklist || DEFAULT_CHECKLIST,
+      content_type: card.content_type || null,
     })
     .select()
     .single();

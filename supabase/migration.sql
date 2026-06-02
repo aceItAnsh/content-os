@@ -93,3 +93,7 @@ create index idx_content_cards_scheduled_date on public.content_cards(scheduled_
 create index idx_ai_runs_user_id on public.ai_runs(user_id);
 create index idx_ai_runs_run_type on public.ai_runs(run_type);
 create index idx_voice_samples_user_id on public.voice_samples(user_id);
+
+-- Migration: Add content_type column (for existing tables)
+-- Run this separately if the table already exists:
+-- ALTER TABLE public.content_cards ADD COLUMN IF NOT EXISTS content_type text DEFAULT NULL;

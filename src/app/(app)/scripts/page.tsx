@@ -5,12 +5,13 @@ import { ContentCard } from '@/lib/types';
 import { getCards } from '@/lib/supabase/api';
 import { CardModal } from '@/components/kanban/CardModal';
 import { Search, FileText } from 'lucide-react';
+import { usePlatformFilter } from '@/lib/platform-filter-context';
 
 export default function ScriptsPage() {
   const [cards, setCards] = useState<ContentCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [platformFilter, setPlatformFilter] = useState('all');
+  const { platformFilter } = usePlatformFilter();
   const [selectedCard, setSelectedCard] = useState<ContentCard | null>(null);
 
   useEffect(() => {
@@ -79,21 +80,6 @@ export default function ScriptsPage() {
             placeholder="Search scripts..."
             className="w-full h-11 pl-10 pr-4 bg-[#111111] border border-white/5 rounded-xl text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500/50 transition-colors"
           />
-        </div>
-        <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
-          {(['all', 'instagram', 'youtube'] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPlatformFilter(p)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors capitalize ${
-                platformFilter === p
-                  ? 'bg-white/10 text-white'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              {p === 'all' ? 'All' : p === 'instagram' ? 'Instagram' : 'YouTube'}
-            </button>
-          ))}
         </div>
       </div>
 
